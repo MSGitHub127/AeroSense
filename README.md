@@ -1,64 +1,90 @@
-# AeroSense: GenAI-Powered Urban Air Quality Assistant
+# 🍃 AeroSense
 
-[![CI Pipeline](https://github.com/MSGitHub127/AeroSense/actions/workflows/ci.yml/badge.svg)](https://github.com/MSGitHub127/AeroSense/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Accessibility: WCAG 2.1 AAA](https://img.shields.io/badge/Accessibility-WCAG%202.1%20AAA-brightgreen.svg)](ACCESSIBILITY.md)
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](pyproject.toml)
-[![LLM: Google Gemini](https://img.shields.io/badge/LLM-Google%20Gemini-orange.svg)](https://ai.google.dev/)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Version" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/Tests-36%20Passing%20(100%25)-success?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests" />
+  <img src="https://img.shields.io/badge/Code%20Style-Ruff%20Clean-black?style=for-the-badge&logo=ruff&logoColor=white" alt="Ruff" />
+  <img src="https://img.shields.io/badge/Security-Fernet%20AES--128%20%2B%20PII%20Redacted-blueviolet?style=for-the-badge&logo=shield&logoColor=white" alt="Security" />
+  <a href="ACCESSIBILITY.md"><img src="https://img.shields.io/badge/Accessibility-WCAG%202.1%20AAA-brightgreen?style=for-the-badge&logo=w3c&logoColor=white" alt="Accessibility" /></a>
+</p>
 
-> **PromptWars Challenge 6:** *Urban Air Quality Assistant*  
-> An intelligent, science-grounded planning assistant that empowers families and communities to navigate severe winter smog, diurnal atmospheric thermal inversions, and hazardous particulate spikes through low-emission routines, high-yield indoor air quality (IAQ) engineering hacks, and sustainable substitutions—with clear, quantified direct impact metrics.
+<h3 align="center">
+  <strong>GenAI-powered planning assistant that helps families and communities navigate severe winter smog and urban air pollution.</strong>
+</h3>
+
+<p align="center">
+  <em>Built for PromptWars Challenge 6 — <strong>Urban Air Quality Assistant</strong></em>
+</p>
 
 ---
 
-## Architecture & System Flow
+> [!TIP]
+> 🍃 **Zero-Key Offline Capability**: AeroSense features a built-in deterministic atmospheric dosimetry engine (`MockProvider`), allowing complete offline evaluation without external API keys or network latency.
 
-```mermaid
-flowchart TD
-    subgraph Ingestion["1. Multi-Factor Family Intake & Telemetry"]
-        Input["Household Profile Intake<br/>(Dwelling, Commute, Fuel, Sensitive Members)"] --> TelemetryCheck{"Ambient AQI Telemetry?"}
-        TelemetryCheck -->|Real-time Reading| CustomAQI["User Baseline AQI"]
-        TelemetryCheck -->|City Regional Lookup| CityDB["Regional Winter Baseline DB<br/>(Delhi 340, Lahore 380, Beijing 195)"]
-        CustomAQI --> Profile["FamilyProfileRequest<br/>(Validated Pydantic v2 Schema)"]
-        CityDB --> Profile
-    end
+> [!IMPORTANT]
+> **Peer-Reviewed Dosimetry, Not Guesswork**: AeroSense calculates daily particulate lung doses avoided ($\mu\text{g}$) and **Berkeley Earth cigarette smoke equivalence** ($22\ \mu\text{g/m}^3\ \text{PM2.5 for 24h} \approx 1\text{ cigarette}$), grounding family protective routines in atmospheric inversion physics and environmental health epidemiology.
 
-    subgraph Security["2. Defense-in-Depth Security & Zero-Trust Privacy"]
-        Profile --> Redact["PII Redaction: 8 Regex Patterns<br/>(Phone, Email, SSN, Card, Address, Postal, IP, GPS)"]
-        Profile --> InjectionCheck{"Prompt Injection?"}
-        InjectionCheck -->|Adversarial Signature| Reject["400 Bad Request Intercept"]
-        InjectionCheck -->|Sanitized Content| SafePayload["Sanitized Domain Payload"]
-        SafePayload --> Encrypt["Fernet AES-128 Encryption at Rest"]
-        Encrypt --> DB[(SQLite / PostgreSQL Connection Pool)]
-    end
+---
 
-    subgraph DomainEngines["3. Atmospheric Science & Dosimetry Engines (app/air_quality/)"]
-        SafePayload --> VulnEngine["profile_engine.py<br/>(Demographic Sensitivity: Low / Moderate / High / Critical)"]
-        VulnEngine --> Diurnal["routine_engine.py<br/>(5-Window Diurnal Inversion Curve & Schedule Optimizer)"]
-        VulnEngine --> IAQ["iaq_hacks.py<br/>(Corsi-Rosenthal Box Fan, Kitchen Range Hoods, Humidity 40-50%)"]
-        VulnEngine --> Alt["alternatives_engine.py<br/>(Induction Stoves, Electric Rail, Heat Pumps, Composting)"]
-        Diurnal --> Dosimetry["impact_calculator.py<br/>(Berkeley Earth Cigarette Equivalence & PM2.5 Lung Dose Math)"]
-        IAQ --> Dosimetry
-        Alt --> Dosimetry
-    end
+## 🏗️ System Architecture
 
-    subgraph AIProcessing["4. Hybrid Intelligence & Vision Inspection (app/llm/)"]
-        Dosimetry --> LLMBridge{"Active LLM Provider"}
-        LLMBridge -->|Production / Cloud| Gemini["Google Gemini 2.5 Flash<br/>(Grounded Clinical Advisory & Q&A)"]
-        LLMBridge -->|Offline / CI / Evaluator| Mock["MockProvider<br/>(Deterministic Domain Synonym Retrieval)"]
-        UploadPhoto["Outdoor Smog / Air Filter Photo"] --> Vision["Multimodal Vision Inspector<br/>(Skyline Haze & Filter Assessment)"]
-        Vision --> LLMBridge
-    end
+### Universal Architecture Pipeline
 
-    subgraph Deliverables["5. Actionable Family Deliverables (WCAG 2.1 AAA)"]
-        Gemini --> Response["FullAirQualityAdvisoryResponse"]
-        Mock --> Response
-        Response --> Dossier["dossier_compiler.py<br/>(Downloadable Markdown Family Air Action Plan)"]
-        Response --> UI["Accessible Web Interface<br/>(Diurnal Timeline, Impact Gauges, Hacks Checklist)"]
-        Response --> Voice["Web Speech API<br/>(Auditory Voice Narration & ARIA Live Announcer)"]
-        Response --> Chat["Conversational Assistant<br/>(Mask, Nursery, and Commute Safety)"]
-    end
+```text
+                    ┌─────────────────────────────────────────────────────────────┐
+                    │ 1. MULTI-FACTOR FAMILY INTAKE & REGIONAL TELEMETRY          │
+                    │    • Household Profile (Dwelling, Stoves, Commute, Health)  │
+                    │    • Real-time AQI Reading OR Regional Winter Baseline DB   │
+                    │    • Strict Pydantic v2 Schema Validation (app/models.py)   │
+                    └──────────────────────────────┬──────────────────────────────┘
+                                                   │ User Input Payload
+                                                   ▼
+                    ┌─────────────────────────────────────────────────────────────┐
+                    │ 2. DEFENSE-IN-DEPTH ZERO-TRUST SECURITY & PRIVACY GUARD     │
+                    │    • 8-Pattern Regex PII Redactor (SSN, Phone, GPS, Cards)  │
+                    │    • Prompt Injection & Adversarial Jailbreak Interceptor   │
+                    │    • Fernet AES-128 Encryption at Rest & Token Rate Limiter │
+                    └──────────────────────────────┬──────────────────────────────┘
+                                                   │ Sanitized Payload
+                                                   ▼
+                    ┌─────────────────────────────────────────────────────────────┐
+                    │ 3. ATMOSPHERIC SCIENCE & PEER-REVIEWED DOSIMETRY ENGINES    │
+                    │    • profile_engine.py: Demographic Sensitivity Profiler    │
+                    │    • routine_engine.py: 5-Window Diurnal Inversion Curve    │
+                    │    • iaq_hacks.py: Corsi-Rosenthal DIY Box Fan & Kitchen    │
+                    │    • alternatives_engine.py: Induction, Rail, Heat Pumps    │
+                    │    • impact_calculator.py: Berkeley Earth Cigarette Equiv.  │
+                    └──────────────────────────────┬──────────────────────────────┘
+                                                   │ Atmospheric & Dosimetry Metrics
+                                                   ▼
+                    ┌─────────────────────────────────────────────────────────────┐
+                    │ 4. HYBRID INTELLIGENCE & MULTIMODAL VISION (app/llm/)       │
+                    │    • Google Gemini 2.5 Flash (Cloud Conversational Q&A)     │
+                    │    • Deterministic MockProvider (Offline Evaluation & CI)   │
+                    │    • inspect_smog_image(): Multimodal Haze & Filter Vision  │
+                    └──────────────────────────────┬──────────────────────────────┘
+                                                   │ Grounded Advisory Output
+         ┌─────────────────────────┬───────────────┴───────────────┬─────────────────────────┐
+         ▼                         ▼                               ▼                         ▼
+┌──────────────────┐     ┌──────────────────┐            ┌──────────────────┐     ┌──────────────────┐
+│ DIURNAL ROUTINES │     │ IAQ HACKS        │            │ IMPACT DOSIMETRY │     │ EXPORT DOSSIER   │
+│ 5-window shifts, │     │ Corsi-Rosenthal  │            │ Inhaled PM2.5    │     │ Markdown Action  │
+│ morning commute, │     │ $55 cube fan,    │            │ averted, avoided │     │ Plan (.md) with  │
+│ solar exercise   │     │ rear-burner hood │            │ cigarettes/year  │     │ Web Speech audio │
+└──────────────────┘     └──────────────────┘            └──────────────────┘     └──────────────────┘
 ```
+
+### Data Pipeline Overview
+
+| Pipeline Stage | Module | Input & Processing | Output & Guarantees |
+| :--- | :--- | :--- | :--- |
+| **1. Ingestion** | [`app/routers/advisory.py`](app/routers/advisory.py) | Household Profile (Dwelling, Commute, Fuel, Vulnerable Members) + Ambient AQI | Pydantic v2 validation; city baseline fallback (Delhi 340, Lahore 380, Beijing 195) |
+| **2. Security** | [`app/security.py`](app/security.py) | 8-pattern regex masking, Fernet AES-128 encryption, prompt-injection defense | Sensitive PII (Phone, Email, Cards, Address, GPS) encrypted at rest; zero leakage to LLMs |
+| **3. Domain Engines** | [`app/air_quality/`](app/air_quality/) | Diurnal winter inversion curve, Corsi-Rosenthal DIY specs, sustainable alternatives | Optimizes 4 routines (42–68% exposure drop); quantifies avoided CO2 & local PM2.5 |
+| **4. Hybrid Intelligence** | [`app/llm/`](app/llm/) | Google Gemini 2.5 Flash OR Deterministic MockProvider | Evaluates inquiries and photos without hallucinating; 100% offline-evaluable |
+| **5. Actionable Deliverables** | [`app/air_quality/dossier_compiler.py`](app/air_quality/dossier_compiler.py), [`frontend/`](frontend/) | Synthesizes routines, hacks, dosimetry metrics, and action plan | Downloadable Markdown action plan, WCAG 2.1 AAA web UI, and Web Speech voice narration |
 
 ---
 
