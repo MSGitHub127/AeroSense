@@ -14,42 +14,59 @@
 ## Architecture & System Flow
 
 ```mermaid
-flowchart TD
-    User["Family Intake Profile"] --> API["FastAPI Gateway"]
-    API --> Security["Zero-Trust Security & PII Redactor"]
-    Security --> ProfileEngine["Vulnerability Tier & Baseline Engine"]
-    
-    ProfileEngine --> Diurnal["Diurnal Smog Inversion Engine"]
-    ProfileEngine --> IAQ["Indoor Air Quality Hacks Engine"]
-    ProfileEngine --> Alternatives["Sustainable Lifestyle Substitutions"]
-    ProfileEngine --> Dosimetry["Berkeley Earth Particulate Dosimetry"]
+graph TD
+    subgraph CLIENT ["Accessible Client Surface (WCAG 2.1 AAA)"]
+        WEB["Single-Page Web Application<br/>(HTML5 / CSS / Vanilla JS)"]
+        SPEECH["Web Speech API<br/>Audio Voice Narration"]
+        A11Y["WCAG 2.1 AAA Controls<br/>(Skip Link, Live Announcer)"]
+        WEB --- SPEECH
+        WEB --- A11Y
+    end
 
-    Diurnal --> Synthesis["Action Plan Synthesis Engine"]
-    IAQ --> Synthesis
-    Alternatives --> Synthesis
-    Dosimetry --> Synthesis
+    subgraph API ["FastAPI Gateway & Security Layer (app/main.py)"]
+        CORS["CORS & GZip Compression"]
+        SEC_HEADERS["Security Headers<br/>(CSP, X-Frame, Nosniff)"]
+        RATE["Token-Bucket Rate Limiter"]
+        PII["8-Pattern Regex PII Redactor"]
+        FERNET["Fernet AES-128 Encryption at Rest"]
+        SAN["Prompt Injection Defense"]
+        CORS --> SEC_HEADERS --> RATE --> PII
+        PII --> FERNET
+        PII --> SAN
+    end
 
-    Synthesis --> LLM["Google Gemini & Offline Mock Provider"]
-    LLM --> Dossier["Exportable Markdown Family Air Action Plan"]
-    LLM --> Vision["Multimodal Smog & Filter Inspector"]
-    LLM --> Consult["Conversational AI Air Quality Assistant"]
-    
-    Dossier --> UI["Accessible Web Interface & Speech Narration"]
+    subgraph ENGINES ["Atmospheric Dosimetry & Domain Engines (app/air_quality/)"]
+        ROUTINE["Diurnal Smog Curve & Routine Engine<br/>(5-Window Thermal Inversion Shifts)"]
+        IAQ["Indoor Air Quality Hacks Engine<br/>(Corsi-Rosenthal Box Fan & Kitchen Protocols)"]
+        ALT["Sustainable Alternatives Engine<br/>(Clean Fuel & Transit Substitutions)"]
+        IMPACT["Impact Calculator & Dosimetry<br/>(PM2.5 Lung Dose & Cigarette Equiv.)"]
+        DOSSIER["Markdown Dossier Compiler<br/>(Family Air Action Plan)"]
+    end
 
-    style User fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style API fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style Security fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style ProfileEngine fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style Diurnal fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
-    style IAQ fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
-    style Alternatives fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
-    style Dosimetry fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
-    style Synthesis fill:#0369a1,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style LLM fill:#0369a1,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style Dossier fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style Vision fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style Consult fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
-    style UI fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#ffffff
+    subgraph LLM ["Pluggable GenAI Layer (app/llm/)"]
+        FACTORY["LLMProvider Factory"]
+        GEMINI["Google Gemini 2.5 Flash<br/>(Multimodal Vision & Consultations)"]
+        MOCK["Deterministic MockProvider<br/>(Offline Peer-Reviewed Synonyms)"]
+        FACTORY --> GEMINI
+        FACTORY --> MOCK
+    end
+
+    subgraph DB ["Persistence Layer (app/db.py)"]
+        SQLA["SQLAlchemy 2.0 Engine"]
+        PG["PostgreSQL 16 Connection Pool<br/>(pool_size=10, max_overflow=20)"]
+        SQLITE["SQLite Local Store"]
+        SQLA --> PG
+        SQLA --> SQLITE
+    end
+
+    WEB -->|"HTTP / REST API (Bearer Token)"| CORS
+    SAN --> ROUTINE
+    SAN --> IAQ
+    SAN --> ALT
+    SAN --> IMPACT
+    IMPACT --> DOSSIER
+    DOSSIER --> FACTORY
+    DOSSIER --> SQLA
 ```
 
 ---
