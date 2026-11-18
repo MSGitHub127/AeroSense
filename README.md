@@ -14,59 +14,50 @@
 ## Architecture & System Flow
 
 ```mermaid
-graph TD
-    subgraph CLIENT ["Accessible Client Surface (WCAG 2.1 AAA)"]
-        WEB["Single-Page Web Application<br/>(HTML5 / CSS / Vanilla JS)"]
-        SPEECH["Web Speech API<br/>Audio Voice Narration"]
-        A11Y["WCAG 2.1 AAA Controls<br/>(Skip Link, Live Announcer)"]
-        WEB --- SPEECH
-        WEB --- A11Y
+flowchart TD
+    subgraph Ingestion["1. Multi-Factor Family Intake & Telemetry"]
+        Input["Household Profile Intake<br/>(Dwelling, Commute, Fuel, Sensitive Members)"] --> TelemetryCheck{"Ambient AQI Telemetry?"}
+        TelemetryCheck -->|Real-time Reading| CustomAQI["User Baseline AQI"]
+        TelemetryCheck -->|City Regional Lookup| CityDB["Regional Winter Baseline DB<br/>(Delhi 340, Lahore 380, Beijing 195)"]
+        CustomAQI --> Profile["FamilyProfileRequest<br/>(Validated Pydantic v2 Schema)"]
+        CityDB --> Profile
     end
 
-    subgraph API ["FastAPI Gateway & Security Layer (app/main.py)"]
-        CORS["CORS & GZip Compression"]
-        SEC_HEADERS["Security Headers<br/>(CSP, X-Frame, Nosniff)"]
-        RATE["Token-Bucket Rate Limiter"]
-        PII["8-Pattern Regex PII Redactor"]
-        FERNET["Fernet AES-128 Encryption at Rest"]
-        SAN["Prompt Injection Defense"]
-        CORS --> SEC_HEADERS --> RATE --> PII
-        PII --> FERNET
-        PII --> SAN
+    subgraph Security["2. Defense-in-Depth Security & Zero-Trust Privacy"]
+        Profile --> Redact["PII Redaction: 8 Regex Patterns<br/>(Phone, Email, SSN, Card, Address, Postal, IP, GPS)"]
+        Profile --> InjectionCheck{"Prompt Injection?"}
+        InjectionCheck -->|Adversarial Signature| Reject["400 Bad Request Intercept"]
+        InjectionCheck -->|Sanitized Content| SafePayload["Sanitized Domain Payload"]
+        SafePayload --> Encrypt["Fernet AES-128 Encryption at Rest"]
+        Encrypt --> DB[(SQLite / PostgreSQL Connection Pool)]
     end
 
-    subgraph ENGINES ["Atmospheric Dosimetry & Domain Engines (app/air_quality/)"]
-        ROUTINE["Diurnal Smog Curve & Routine Engine<br/>(5-Window Thermal Inversion Shifts)"]
-        IAQ["Indoor Air Quality Hacks Engine<br/>(Corsi-Rosenthal Box Fan & Kitchen Protocols)"]
-        ALT["Sustainable Alternatives Engine<br/>(Clean Fuel & Transit Substitutions)"]
-        IMPACT["Impact Calculator & Dosimetry<br/>(PM2.5 Lung Dose & Cigarette Equiv.)"]
-        DOSSIER["Markdown Dossier Compiler<br/>(Family Air Action Plan)"]
+    subgraph DomainEngines["3. Atmospheric Science & Dosimetry Engines (app/air_quality/)"]
+        SafePayload --> VulnEngine["profile_engine.py<br/>(Demographic Sensitivity: Low / Moderate / High / Critical)"]
+        VulnEngine --> Diurnal["routine_engine.py<br/>(5-Window Diurnal Inversion Curve & Schedule Optimizer)"]
+        VulnEngine --> IAQ["iaq_hacks.py<br/>(Corsi-Rosenthal Box Fan, Kitchen Range Hoods, Humidity 40-50%)"]
+        VulnEngine --> Alt["alternatives_engine.py<br/>(Induction Stoves, Electric Rail, Heat Pumps, Composting)"]
+        Diurnal --> Dosimetry["impact_calculator.py<br/>(Berkeley Earth Cigarette Equivalence & PM2.5 Lung Dose Math)"]
+        IAQ --> Dosimetry
+        Alt --> Dosimetry
     end
 
-    subgraph LLM ["Pluggable GenAI Layer (app/llm/)"]
-        FACTORY["LLMProvider Factory"]
-        GEMINI["Google Gemini 2.5 Flash<br/>(Multimodal Vision & Consultations)"]
-        MOCK["Deterministic MockProvider<br/>(Offline Peer-Reviewed Synonyms)"]
-        FACTORY --> GEMINI
-        FACTORY --> MOCK
+    subgraph AIProcessing["4. Hybrid Intelligence & Vision Inspection (app/llm/)"]
+        Dosimetry --> LLMBridge{"Active LLM Provider"}
+        LLMBridge -->|Production / Cloud| Gemini["Google Gemini 2.5 Flash<br/>(Grounded Clinical Advisory & Q&A)"]
+        LLMBridge -->|Offline / CI / Evaluator| Mock["MockProvider<br/>(Deterministic Domain Synonym Retrieval)"]
+        UploadPhoto["Outdoor Smog / Air Filter Photo"] --> Vision["Multimodal Vision Inspector<br/>(Skyline Haze & Filter Assessment)"]
+        Vision --> LLMBridge
     end
 
-    subgraph DB ["Persistence Layer (app/db.py)"]
-        SQLA["SQLAlchemy 2.0 Engine"]
-        PG["PostgreSQL 16 Connection Pool<br/>(pool_size=10, max_overflow=20)"]
-        SQLITE["SQLite Local Store"]
-        SQLA --> PG
-        SQLA --> SQLITE
+    subgraph Deliverables["5. Actionable Family Deliverables (WCAG 2.1 AAA)"]
+        Gemini --> Response["FullAirQualityAdvisoryResponse"]
+        Mock --> Response
+        Response --> Dossier["dossier_compiler.py<br/>(Downloadable Markdown Family Air Action Plan)"]
+        Response --> UI["Accessible Web Interface<br/>(Diurnal Timeline, Impact Gauges, Hacks Checklist)"]
+        Response --> Voice["Web Speech API<br/>(Auditory Voice Narration & ARIA Live Announcer)"]
+        Response --> Chat["Conversational Assistant<br/>(Mask, Nursery, and Commute Safety)"]
     end
-
-    WEB -->|"HTTP / REST API (Bearer Token)"| CORS
-    SAN --> ROUTINE
-    SAN --> IAQ
-    SAN --> ALT
-    SAN --> IMPACT
-    IMPACT --> DOSSIER
-    DOSSIER --> FACTORY
-    DOSSIER --> SQLA
 ```
 
 ---
