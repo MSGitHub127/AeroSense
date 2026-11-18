@@ -15,23 +15,28 @@
 
 ```mermaid
 flowchart TD
-    User["Family Intake Profile"] --> API["FastAPI Gateway (app.main)"]
-    API --> Security["Zero-Trust Security & PII Redactor"]
-    Security --> ProfileEngine["Vulnerability Tier & Regional Baseline Engine"]
+    User["Family Intake Profile"] --> API["FastAPI Gateway"]
+    API --> Security["Zero-Trust Security and PII Redactor"]
+    Security --> ProfileEngine["Vulnerability Tier and Regional Baseline Engine"]
     
-    subgraph CoreEngines["Atmospheric Dosimetry & Domain Engines"]
-        ProfileEngine --> Diurnal["Diurnal Inversion Curve & Routine Optimizer"]
-        ProfileEngine --> IAQ["IAQ Hacks Engine (Corsi-Rosenthal, Kitchen, Sealing)"]
-        ProfileEngine --> Alternatives["Sustainable Substitutions & Emission Offsets"]
-        ProfileEngine --> Dosimetry["Impact Calculator (PM2.5 Lung Dose, Cigarettes)"]
+    subgraph CoreEngines ["Atmospheric Dosimetry and Domain Engines"]
+        ProfileEngine --> Diurnal["Diurnal Inversion Curve and Routine Optimizer"]
+        ProfileEngine --> IAQ["IAQ Hacks Engine - Corsi Rosenthal and Kitchen Protocols"]
+        ProfileEngine --> Alternatives["Sustainable Substitutions and Emission Offsets"]
+        ProfileEngine --> Dosimetry["Impact Calculator - PM2.5 Lung Dose and Cigarettes"]
     end
 
-    CoreEngines --> LLMProvider["LLM Layer (Google Gemini / Deterministic Mock)"]
-    LLMProvider --> Dossier["Exportable Family Air Action Plan (Markdown)"]
-    LLMProvider --> Vision["Multimodal Smog & Filter Vision Inspector"]
-    LLMProvider --> Consult["Conversational Q&A Assistant"]
+    Diurnal --> Synthesis["Plan Synthesis Engine"]
+    IAQ --> Synthesis
+    Alternatives --> Synthesis
+    Dosimetry --> Synthesis
+
+    Synthesis --> LLMProvider["LLM Layer - Google Gemini and Deterministic Mock"]
+    LLMProvider --> Dossier["Exportable Family Air Action Plan"]
+    LLMProvider --> Vision["Multimodal Smog and Filter Vision Inspector"]
+    LLMProvider --> Consult["Conversational QA Assistant"]
     
-    Dossier --> UI["Accessible WCAG 2.1 AAA Web Interface & Voice Narration"]
+    Dossier --> UI["Accessible WCAG 2.1 AAA Web Interface and Voice Narration"]
 ```
 
 ---
