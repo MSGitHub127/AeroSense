@@ -16,27 +16,40 @@
 ```mermaid
 flowchart TD
     User["Family Intake Profile"] --> API["FastAPI Gateway"]
-    API --> Security["Zero-Trust Security and PII Redactor"]
-    Security --> ProfileEngine["Vulnerability Tier and Regional Baseline Engine"]
+    API --> Security["Zero-Trust Security & PII Redactor"]
+    Security --> ProfileEngine["Vulnerability Tier & Baseline Engine"]
     
-    subgraph CoreEngines ["Atmospheric Dosimetry and Domain Engines"]
-        ProfileEngine --> Diurnal["Diurnal Inversion Curve and Routine Optimizer"]
-        ProfileEngine --> IAQ["IAQ Hacks Engine - Corsi Rosenthal and Kitchen Protocols"]
-        ProfileEngine --> Alternatives["Sustainable Substitutions and Emission Offsets"]
-        ProfileEngine --> Dosimetry["Impact Calculator - PM2.5 Lung Dose and Cigarettes"]
-    end
+    ProfileEngine --> Diurnal["Diurnal Smog Inversion Engine"]
+    ProfileEngine --> IAQ["Indoor Air Quality Hacks Engine"]
+    ProfileEngine --> Alternatives["Sustainable Lifestyle Substitutions"]
+    ProfileEngine --> Dosimetry["Berkeley Earth Particulate Dosimetry"]
 
-    Diurnal --> Synthesis["Plan Synthesis Engine"]
+    Diurnal --> Synthesis["Action Plan Synthesis Engine"]
     IAQ --> Synthesis
     Alternatives --> Synthesis
     Dosimetry --> Synthesis
 
-    Synthesis --> LLMProvider["LLM Layer - Google Gemini and Deterministic Mock"]
-    LLMProvider --> Dossier["Exportable Family Air Action Plan"]
-    LLMProvider --> Vision["Multimodal Smog and Filter Vision Inspector"]
-    LLMProvider --> Consult["Conversational QA Assistant"]
+    Synthesis --> LLM["Google Gemini & Offline Mock Provider"]
+    LLM --> Dossier["Exportable Markdown Family Air Action Plan"]
+    LLM --> Vision["Multimodal Smog & Filter Inspector"]
+    LLM --> Consult["Conversational AI Air Quality Assistant"]
     
-    Dossier --> UI["Accessible WCAG 2.1 AAA Web Interface and Voice Narration"]
+    Dossier --> UI["Accessible Web Interface & Speech Narration"]
+
+    style User fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style API fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style Security fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style ProfileEngine fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style Diurnal fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
+    style IAQ fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
+    style Alternatives fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
+    style Dosimetry fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#ffffff
+    style Synthesis fill:#0369a1,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style LLM fill:#0369a1,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style Dossier fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style Vision fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style Consult fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    style UI fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#ffffff
 ```
 
 ---
