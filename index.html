@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroSense - Urban Air Quality Assistant</title>
+  <meta name="description" content="GenAI-powered planning assistant helping families navigate severe winter smog with low-emission routines and indoor air hacks.">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="frontend/styles.css">
+</head>
+<body>
+  <!-- Accessible Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA Live Status Announcer for Screen Readers -->
+  <div id="status-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <header role="banner">
+    <div class="header-container">
+      <div style="display:flex; align-items:center;">
+        <h1 style="font-size:1.5rem; font-weight:800; color:#ffffff; letter-spacing:-0.02em;">
+          🍃 AeroSense
+        </h1>
+        <span class="brand-badge">Winter Smog Shield</span>
+      </div>
+      <div class="live-indicator" aria-label="System operational status">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span>Atmospheric Dosimetry Engine Online</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" role="main">
+    <section aria-labelledby="hero-title">
+      <h2 id="hero-title" class="page-title">Navigate Severe Smog with Quantified Confidence</h2>
+      <p class="page-subtitle">
+        AeroSense models diurnal winter thermal inversions, optimizes family transit and school routines, 
+        and formulates high-impact indoor air interventions to drastically lower inhaled particulate lung doses.
+      </p>
+    </section>
+
+    <!-- Household Intake Form -->
+    <section class="card" aria-labelledby="form-heading">
+      <h2 id="form-heading">1. Household Profile & Sensitivity Assessment</h2>
+      <form id="profile-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="household-name">Household / Family Name</label>
+            <input type="text" id="household-name" name="household-name" value="Sharma Family" required aria-required="true">
+          </div>
+
+          <div class="form-group">
+            <label for="location-city">City / Metropolitan Region</label>
+            <input type="text" id="location-city" name="location-city" value="Delhi" required aria-required="true">
+          </div>
+
+          <div class="form-group">
+            <label for="baseline-aqi">Current Ambient AQI (Leave blank for seasonal city default)</label>
+            <input type="number" id="baseline-aqi" name="baseline-aqi" placeholder="e.g. 340" min="0" max="1000">
+          </div>
+
+          <div class="form-group">
+            <label for="home-type">Dwelling Structure</label>
+            <select id="home-type" name="home-type">
+              <option value="apartment">Multi-Story Apartment</option>
+              <option value="detached_house">Detached House</option>
+              <option value="townhome">Townhome</option>
+              <option value="condo">Condominium</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cooking-fuel">Primary Cooking Fuel</label>
+            <select id="cooking-fuel" name="cooking-fuel">
+              <option value="natural_gas">Natural Gas Stovetop</option>
+              <option value="induction">Electric Induction Cooktop</option>
+              <option value="electric_coil">Electric Coil Stove</option>
+              <option value="biomass_wood">Biomass / Wood Hearth</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="commute-mode">Primary Commute Mode</label>
+            <select id="commute-mode" name="commute-mode">
+              <option value="car_solo">Single Occupant Gasoline Car</option>
+              <option value="carpool">Shared Carpool</option>
+              <option value="public_transit">Public Transit (Metro / Bus)</option>
+              <option value="cycling">Bicycle / Micromobility</option>
+              <option value="walking">Walking</option>
+              <option value="electric_vehicle">Electric Vehicle (EV)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <fieldset style="border:1px solid var(--border-color); border-radius:8px; padding:1rem;">
+            <legend style="padding:0 0.5rem; font-weight:700; color:var(--text-primary);">
+              Vulnerable Demographic Members Present
+            </legend>
+            <div style="display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:0.5rem;">
+              <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal;">
+                <input type="checkbox" name="vulnerable" value="infants_children" checked>
+                Infants / Young Children
+              </label>
+              <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal;">
+                <input type="checkbox" name="vulnerable" value="asthmatics_respiratory" checked>
+                Asthma / Respiratory Conditions
+              </label>
+              <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal;">
+                <input type="checkbox" name="vulnerable" value="elderly">
+                Elderly Seniors (65+)
+              </label>
+              <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal;">
+                <input type="checkbox" name="vulnerable" value="pets">
+                Household Pets (Dogs/Cats)
+              </label>
+            </div>
+          </fieldset>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+          <input type="checkbox" id="has-hepa" name="has-hepa" style="width:20px; height:20px;">
+          <label for="has-hepa" style="cursor:pointer;">
+            Household currently operates a motorized True HEPA air purifier
+          </label>
+        </div>
+
+        <button type="submit" id="btn-generate-plan" class="btn btn-primary" style="width:100%; max-width:350px;">
+          Generate Family Air Action Plan
+        </button>
+      </form>
+    </section>
+
+    <!-- Advisory Results Section (Initially Hidden) -->
+    <div id="advisory-results" style="display:none;" aria-live="polite">
+      
+      <!-- Audio Narration Bar -->
+      <section class="audio-bar" aria-label="Audio accessibility toolbar">
+        <div>
+          <strong style="color:#ffffff; font-size:1.1rem;">🎧 Accessibility Voice Narration</strong>
+          <p style="font-size:0.875rem; color:var(--text-secondary);">
+            Listen to your personalized action plan read aloud via synthesized voice.
+          </p>
+        </div>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+          <button id="btn-narrate" class="btn btn-secondary" aria-pressed="false">
+            🔊 Read Advisory Aloud
+          </button>
+          <button id="btn-download-dossier" class="btn btn-primary">
+            📥 Download Markdown Dossier
+          </button>
+        </div>
+      </section>
+
+      <!-- Direct Impact Dosimetry Metrics -->
+      <section class="card" aria-labelledby="impact-heading">
+        <h2 id="impact-heading">2. Quantified Direct Health & Emissions Impact</h2>
+        <p style="color:var(--text-secondary); margin-bottom:1rem;">
+          Direct particulate lung dosage kept out of family airways and collective community emissions avoided:
+        </p>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <div id="metric-lung-dose" class="metric-value">0 µg</div>
+            <div class="metric-label">Daily PM2.5 Inhaled Lung Dose Avoided</div>
+          </div>
+          <div class="metric-box">
+            <div id="metric-cigs" class="metric-value">0</div>
+            <div class="metric-label">Annual Cigarette Inhalations Averted (Equiv.)</div>
+          </div>
+          <div class="metric-box">
+            <div id="metric-co2" class="metric-value">0 kg</div>
+            <div class="metric-label">Direct Annual CO2 Emissions Abated</div>
+          </div>
+          <div class="metric-box">
+            <div id="metric-risk" class="metric-value">0%</div>
+            <div class="metric-label">Acute Respiratory Exacerbation Risk Drop</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Diurnal Smog Cycle Timeline -->
+      <section class="card" aria-labelledby="diurnal-heading">
+        <h2 id="diurnal-heading">3. Diurnal Winter Smog Cycle & Timing Windows</h2>
+        <p style="color:var(--text-secondary); margin-bottom:1rem;">
+          Atmospheric thermal inversions concentrate particulate pollution during nights and early mornings. 
+          Align your daily schedule with the mid-afternoon solar dispersion window:
+        </p>
+        <div id="diurnal-timeline-list" class="diurnal-timeline">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- Low-Emission Daily Routines -->
+      <section class="card" aria-labelledby="routines-heading">
+        <h2 id="routines-heading">4. Optimized Low-Emission Daily Routines</h2>
+        <div id="routines-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- IAQ Hacks Checklist -->
+      <section class="card" aria-labelledby="iaq-heading">
+        <h2 id="iaq-heading">5. High-Impact Indoor Air Quality (IAQ) Hacks</h2>
+        <p style="color:var(--text-secondary); margin-bottom:1rem;">
+          Low-cost, peer-reviewed engineering hacks to keep indoor respirable particulate counts in the safe green zone:
+        </p>
+        <div id="iaq-hacks-list" class="hack-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- Sustainable Alternatives Comparison -->
+      <section class="card" aria-labelledby="alternatives-heading">
+        <h2 id="alternatives-heading">6. Sustainable Lifestyle Alternatives & Emission Savings</h2>
+        <div class="table-wrapper">
+          <table aria-label="Sustainable alternatives table">
+            <thead>
+              <tr>
+                <th scope="col">Domain</th>
+                <th scope="col">Standard High-Emission Practice</th>
+                <th scope="col">AeroSense Clean Alternative</th>
+                <th scope="col">Annual CO2 Saved</th>
+                <th scope="col">Local PM2.5 Averted</th>
+                <th scope="col">Economic Payback</th>
+              </tr>
+            </thead>
+            <tbody id="alternatives-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Multimodal Vision Haze Inspection -->
+      <section class="card" aria-labelledby="vision-heading">
+        <h2 id="vision-heading">7. Multimodal Visual Smog & Filter Inspection</h2>
+        <p style="color:var(--text-secondary); margin-bottom:1rem;">
+          Upload a photograph of your exterior window view or air filter for automated AI visual assessment:
+        </p>
+        <form id="vision-form" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+          <input type="file" id="vision-file" accept="image/jpeg,image/png,image/webp" required aria-label="Select photo of window view or air filter">
+          <button type="submit" class="btn btn-secondary">Analyze Smog Photo</button>
+        </form>
+        <div id="vision-result" style="display:none; margin-top:1rem; padding:1rem; background:var(--bg-surface); border-radius:8px; border-left:4px solid var(--color-accent); font-family:monospace; white-space:pre-wrap;">
+        </div>
+      </section>
+
+      <!-- Conversational Assistant -->
+      <section class="card" aria-labelledby="consult-heading">
+        <h2 id="consult-heading">8. Consult AeroSense AI Assistant</h2>
+        <p style="color:var(--text-secondary);">
+          Ask questions regarding masks, nursery air safety, school commutes, or particulate filtration:
+        </p>
+        <div id="chat-history" class="chat-container" aria-live="polite">
+          <div class="chat-bubble assistant">
+            Hello! I am AeroSense. I have reviewed your family's profile and local air quality parameters. What questions or concerns can I assist you with today?
+          </div>
+        </div>
+        <form id="consult-form" style="display:flex; gap:0.75rem; margin-top:1rem;">
+          <input type="text" id="consult-question" placeholder="e.g. Which mask is best for my asthmatic child during the morning drop-off?" style="flex:1;" required aria-label="Air quality question">
+          <button type="submit" class="btn btn-primary">Ask Assistant</button>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <footer role="contentinfo">
+    <p>
+      &copy; 2026 AeroSense. Built for the PromptWars Urban Air Quality Challenge. Powered by Google Gemini.
+    </p>
+    <p style="font-size:0.8rem; margin-top:0.5rem; color:var(--text-muted);">
+      Compliant with WCAG 2.1 AAA Accessibility Guidelines. Peer-reviewed atmospheric science and Berkeley Earth PM2.5 dosimetry models.
+    </p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script src="frontend/app.js"></script>
+</body>
+</html>

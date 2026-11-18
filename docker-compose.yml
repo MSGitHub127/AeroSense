@@ -1,0 +1,36 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aerosense:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - AEROSENSE_LLM_PROVIDER=mock
+      - AEROSENSE_DATABASE_URL=postgresql://aerosense_user:aerosense_pass@db:5432/aerosense_db
+      - PORT=8080
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=aerosense_user
+      - POSTGRES_PASSWORD=aerosense_pass
+      - POSTGRES_DB=aerosense_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aerosense_user -d aerosense_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
