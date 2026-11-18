@@ -42,6 +42,9 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# Initialize database schema immediately on import
+init_db()
+
 app = FastAPI(
     title="AeroSense",
     description="GenAI-powered Urban Air Quality Assistant helping families navigate winter smog.",
