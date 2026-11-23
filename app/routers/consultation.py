@@ -1,7 +1,6 @@
-"""Conversational AI consultation, Markdown dossier export, and multimodal vision analysis."""
+"""Conversational AI consultation, Markdown dossier export, and multimodal vision analysis router."""
 from __future__ import annotations
 
-import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
@@ -10,8 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.deps import get_db_session, get_llm
 from app.llm.provider import LLMProvider
-from app.models import FamilyProfileRecord
-from app.security import decrypt_pii, detect_prompt_injection, redact_pii
+from app.services.consultation_service import ConsultationService
 
 router = APIRouter(prefix="/api", tags=["Consultation & Vision"])
 
@@ -59,40 +57,12 @@ def ask_air_consultation(
 
     Returns:
         AirConsultationResponse: Actionable guidance.
-
-    Raises:
-        HTTPException: If prompt injection is detected or profile is missing.
     """
-    if detect_prompt_injection(payload.question):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Security violation: Inbound inquiry contains forbidden prompt injection patterns.",
-        )
-
-    clean_question = redact_pii(payload.question)
-
-    record = db.query(FamilyProfileRecord).filter(FamilyProfileRecord.id == profile_id).first()
-    if not record:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Profile '{profile_id}' not found.",
-        )
-
-    decrypted_str = decrypt_pii(record.encrypted_details)
-    details = json.loads(decrypted_str)
-
-    household_context = (
-        f"Household: {record.household_name} in {record.location_city}\n"
-        f"Dwelling: {record.home_type}, Cooking Fuel: {details.get('cooking_fuel')}, "
-        f"Commute: {details.get('commute_mode')}\n"
-        f"Estimated Baseline AQI: {record.estimated_baseline_aqi}\n"
-        f"Vulnerability Tier: {details.get('vulnerability_tier')}\n"
-        f"Vulnerable Members: {', '.join(details.get('vulnerable_members', []))}\n"
-    )
-
-    answer = llm.generate_air_consultation(
-        question=clean_question,
-        household_context=household_context,
+    clean_question, answer = ConsultationService.answer_consultation_question(
+        profile_id=profile_id,
+        question=payload.question,
+        db=db,
+        llm=llm,
     )
 
     return AirConsultationResponse(
@@ -102,85 +72,72 @@ def ask_air_consultation(
     )
 
 
-@router.get("/advisory/{profile_id}/dossier", summary="Export Family Air Action Plan in Markdown format")
-def export_action_plan_dossier(
+@router.get("/advisory/{profile_id}/dossier", summary="Export complete Family Air Action Plan as Markdown")
+@router.get("/advisory/{profile_id}/export", summary="Export complete Family Air Action Plan as Markdown (alias)")
+def export_dossier(
     profile_id: str,
     db: Annotated[Session, Depends(get_db_session)],
 ) -> Response:
-    """Export complete synthesized Family Air Action Plan as a downloadable Markdown document.
+    """Download the customized Family Air Quality Action Plan as a Markdown dossier.
 
     Args:
-        profile_id: Profile UUID.
+        profile_id: Target profile UUID.
         db: Database session.
 
     Returns:
-        Response: Plaintext Markdown with download headers.
-
-    Raises:
-        HTTPException: If profile is not found.
+        Response: Markdown file stream with download headers.
     """
-    record = db.query(FamilyProfileRecord).filter(FamilyProfileRecord.id == profile_id).first()
-    if not record:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Profile '{profile_id}' not found.",
-        )
+    filename, action_plan_md = ConsultationService.get_export_dossier_markdown(profile_id, db)
 
-    decrypted_str = decrypt_pii(record.encrypted_details)
-    details = json.loads(decrypted_str)
-    markdown_content = details.get("action_plan_markdown", "# AeroSense Action Plan")
-
-    filename = f"AeroSense_Plan_{record.household_name.replace(' ', '_')}.md"
     return Response(
-        content=markdown_content,
+        content=action_plan_md,
         media_type="text/markdown",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.post("/vision/inspect", response_model=VisionInspectionResponse, summary="Inspect outdoor haze or air filter visually")
+@router.post("/vision/inspect", response_model=VisionInspectionResponse, summary="Analyze smog severity or filter condition via image")
 async def inspect_smog_image(
-    file: Annotated[UploadFile, File(description="Outdoor skyline or air filter photograph")],
-    llm: Annotated[LLMProvider, Depends(get_llm)],
-    prompt: Annotated[
-        str,
-        Form(description="Directive for image analysis"),
-    ] = "Inspect the atmospheric haze level, estimated visibility, and safety precautions.",
+    file: Annotated[UploadFile, File(description="Smog landscape or filter image")],
+    prompt: Annotated[str | None, Form(description="Optional custom query for visual analysis")] = None,
+    llm: Annotated[LLMProvider, Depends(get_llm)] = None,
 ) -> VisionInspectionResponse:
-    """Analyze uploaded photo of outdoor winter smog or home filter conditions using Vision AI.
+    """Inspect an image using multimodal vision to evaluate outdoor haze or indoor air purifier filter condition.
 
     Args:
-        file: Uploaded image file.
-        prompt: Directive instructions.
-        llm: LLM provider instance.
+        file: Uploaded image file (JPEG, PNG, WebP).
+        prompt: Optional query.
+        llm: LLM provider with multimodal vision capability.
 
     Returns:
-        VisionInspectionResponse: Grounded visual inspection assessment.
+        VisionInspectionResponse: Grounded visual evaluation.
 
     Raises:
-        HTTPException: If file type is unsupported or file size exceeds 5MB.
+        HTTPException: If file format or size is invalid.
     """
     allowed_types = {"image/jpeg", "image/png", "image/webp"}
     if file.content_type not in allowed_types:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=f"Unsupported image type '{file.content_type}'. Must be JPEG, PNG, or WebP.",
         )
 
     image_bytes = await file.read()
     if len(image_bytes) > 5 * 1024 * 1024:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="Image size exceeds 5MB limit.",
         )
 
-    analysis = llm.analyze_smog_image(
+    analysis = ConsultationService.analyze_image_stream(
         image_bytes=image_bytes,
-        mime_type=file.content_type or "image/jpeg",
+        filename=file.filename or "image.jpg",
+        content_type=file.content_type,
         prompt=prompt,
+        llm=llm,
     )
 
     return VisionInspectionResponse(
-        filename=file.filename or "upload.jpg",
+        filename=file.filename or "image.jpg",
         analysis=analysis,
     )

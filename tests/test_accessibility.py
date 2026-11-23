@@ -4,14 +4,16 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
 
 def test_html_accessibility_elements():
     """Verify skip link, landmarks, labels, and ARIA attributes in all index.html files."""
     paths_to_check = [
-        Path("frontend/index.html"),
-        Path("app/static/index.html"),
-        Path("app/templates/index.html"),
-        Path("index.html"),
+        ROOT_DIR / "frontend" / "index.html",
+        ROOT_DIR / "app" / "static" / "index.html",
+        ROOT_DIR / "app" / "templates" / "index.html",
+        ROOT_DIR / "index.html",
     ]
 
     for p in paths_to_check:
@@ -42,8 +44,8 @@ def test_html_accessibility_elements():
 def test_css_focus_and_contrast_rules():
     """Verify focus rings, high contrast variables, and reduced-motion rules in stylesheets."""
     css_paths = [
-        Path("frontend/styles.css"),
-        Path("app/static/styles.css"),
+        ROOT_DIR / "frontend" / "styles.css",
+        ROOT_DIR / "app" / "static" / "styles.css",
     ]
 
     for p in css_paths:

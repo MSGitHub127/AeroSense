@@ -225,3 +225,14 @@ class FullAirQualityAdvisoryResponse(BaseModel):
     alternatives: AlternativesResponse = Field(..., description="Sustainable lifestyle alternatives")
     impact: ImpactMetrics = Field(..., description="Quantified health and environmental metrics")
     action_plan_markdown: str = Field(..., description="Full exportable Markdown Family Air Action Plan")
+
+
+class ProfileSummaryResponse(BaseModel):
+    """Summary card representing an existing saved family air advisory."""
+
+    id: str = Field(..., description="Unique profile identifier UUID")
+    household_name: str = Field(..., description="Redacted household identifier")
+    location_city: str = Field(..., description="Target urban municipality")
+    estimated_baseline_aqi: int = Field(..., description="Baseline ambient AQI score")
+    created_at: str = Field(..., description="ISO 8601 creation timestamp")
+

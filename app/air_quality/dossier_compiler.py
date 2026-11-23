@@ -11,38 +11,23 @@ from app.models import (
 )
 
 
-def compile_family_air_dossier(
+def _build_header_and_summary(
     profile: FamilyProfileRequest,
     estimated_aqi: int,
     vulnerability_tier: VulnerabilityTier,
-    routines: DailyRoutinesResponse,
-    iaq_hacks: IAQHacksResponse,
-    alternatives: AlternativesResponse,
     impact: ImpactMetrics,
-    vulnerability_guidelines: list[str],
-) -> str:
-    """Compile a comprehensive, publication-grade Markdown Family Air Action Plan.
-
-    Args:
-        profile: Household profile request.
-        estimated_aqi: Baseline ambient AQI.
-        vulnerability_tier: Sensitivity classification.
-        routines: Diurnal routine recommendations.
-        iaq_hacks: Indoor air quality hacks.
-        alternatives: Sustainable lifestyle alternatives.
-        impact: Quantified personal health and emissions metrics.
-        vulnerability_guidelines: Specialized protective guidelines.
-
-    Returns:
-        str: Fully formatted Markdown document.
-    """
-    lines: list[str] = [
+) -> list[str]:
+    """Construct title, profile metadata headers, and quantified impact summary section."""
+    dwelling = profile.home_type.value.replace("_", " ").title()
+    stove = profile.cooking_fuel.value.title()
+    transit = profile.commute_mode.value.title()
+    return [
         f"# AeroSense: Winter Smog & Urban Air Action Plan for the {profile.household_name} Family",
         "",
         f"**Metropolitan Area:** {profile.location_city}  ",
         f"**Baseline Ambient Winter AQI:** {estimated_aqi}  ",
         f"**Household Health Vulnerability Tier:** {vulnerability_tier.value.upper()}  ",
-        f"**Dwelling Type:** {profile.home_type.value.replace('_', ' ').title()} | **Stove Fuel:** {profile.cooking_fuel.value.title()} | **Transit Mode:** {profile.commute_mode.value.title()}",
+        f"**Dwelling Type:** {dwelling} | **Stove Fuel:** {stove} | **Transit Mode:** {transit}",
         "",
         "---",
         "",
@@ -57,6 +42,12 @@ def compile_family_air_dossier(
         "",
         "---",
         "",
+    ]
+
+
+def _build_routines_section(routines: DailyRoutinesResponse) -> list[str]:
+    """Construct diurnal atmospheric inversion windows table and timing-shifted daily routines."""
+    lines = [
         "## 2. Diurnal Smog Cycle & Timing-Shifted Daily Routines",
         "Winter urban air pollution follows strict atmospheric thermal inversion dynamics: cold night air traps tailpipe and biomass smoke at surface level, while mid-afternoon solar heating briefly lifts the planetary boundary layer.",
         "",
@@ -91,11 +82,18 @@ def compile_family_air_dossier(
         "",
         "---",
         "",
+    ])
+    return lines
+
+
+def _build_iaq_section(iaq_hacks: IAQHacksResponse) -> list[str]:
+    """Construct indoor air quality interventions, room priority rankings, and instructions."""
+    lines = [
         "## 3. High-Yield Indoor Air Quality (IAQ) Hacks",
         "Indoor air during severe winter smog is often 2x to 5x more hazardous than outdoor air due to indoor entrapment of cooking fumes, NO2, and penetrating ultrafine aerosols.",
         "",
         "### Prioritized Room Defense Order",
-    ])
+    ]
 
     for i, room in enumerate(iaq_hacks.room_priority_order, 1):
         lines.append(f"{i}. {room}")
@@ -120,15 +118,19 @@ def compile_family_air_dossier(
             lines.append(f"  1. {step}")
         lines.append("")
 
-    lines.extend([
-        "---",
-        "",
+    lines.extend(["---", ""])
+    return lines
+
+
+def _build_alternatives_section(profile: FamilyProfileRequest, alternatives: AlternativesResponse) -> list[str]:
+    """Construct sustainable lifestyle substitutions table and avoided emissions summary."""
+    lines = [
         "## 4. Sustainable Household Alternatives & Emission Reductions",
         f"By adopting these community-conscious substitutions, the {profile.household_name} family directly abates local ground emissions that cause severe winter inversions.",
         "",
         "| Category | Current Habit | Clean Alternative | Annual CO2 Saved | Local PM2.5 Averted | Financial Impact |",
         "|---|---|---|---|---|---|",
-    ])
+    ]
     for alt in alternatives.alternatives:
         lines.append(
             f"| {alt.habit_category.title()} | {alt.current_habit} | {alt.recommended_alternative} | "
@@ -141,8 +143,15 @@ def compile_family_air_dossier(
         "",
         "---",
         "",
-        "## 5. Vulnerability Directives & Medical Precautions",
     ])
+    return lines
+
+
+def _build_vulnerability_section(vulnerability_guidelines: list[str]) -> list[str]:
+    """Construct medical vulnerability directives and footer."""
+    lines = [
+        "## 5. Vulnerability Directives & Medical Precautions",
+    ]
     for g in vulnerability_guidelines:
         lines.append(f"- {g}")
 
@@ -152,5 +161,39 @@ def compile_family_air_dossier(
         "",
         "*AeroSense Action Plan generated automatically with peer-reviewed atmospheric science dosimetry and Google Gemini intelligence.*",
     ])
+    return lines
 
-    return "\n".join(lines)
+
+def compile_family_air_dossier(
+    profile: FamilyProfileRequest,
+    estimated_aqi: int,
+    vulnerability_tier: VulnerabilityTier,
+    routines: DailyRoutinesResponse,
+    iaq_hacks: IAQHacksResponse,
+    alternatives: AlternativesResponse,
+    impact: ImpactMetrics,
+    vulnerability_guidelines: list[str],
+) -> str:
+    """Compile a comprehensive, publication-grade Markdown Family Air Action Plan.
+
+    Args:
+        profile: Household profile request.
+        estimated_aqi: Baseline ambient AQI.
+        vulnerability_tier: Sensitivity classification.
+        routines: Diurnal routine recommendations.
+        iaq_hacks: Indoor air quality hacks.
+        alternatives: Sustainable lifestyle alternatives.
+        impact: Quantified personal health and emissions metrics.
+        vulnerability_guidelines: Specialized protective guidelines.
+
+    Returns:
+        str: Fully formatted Markdown document.
+    """
+    sections = [
+        *_build_header_and_summary(profile, estimated_aqi, vulnerability_tier, impact),
+        *_build_routines_section(routines),
+        *_build_iaq_section(iaq_hacks),
+        *_build_alternatives_section(profile, alternatives),
+        *_build_vulnerability_section(vulnerability_guidelines),
+    ]
+    return "\n".join(sections)
