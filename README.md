@@ -3,6 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.12%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Version" />
   <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Google_Cloud_Run-Live_Deploy-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Google Cloud Run" />
   <img src="https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Gemini" />
   <img src="https://img.shields.io/badge/Tests-36%20Passing%20(100%25)-success?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests" />
   <img src="https://img.shields.io/badge/Code%20Style-Ruff%20Clean-black?style=for-the-badge&logo=ruff&logoColor=white" alt="Ruff" />
@@ -15,13 +16,16 @@
 </h3>
 
 <p align="center">
-  <em>Built for PromptWars Challenge 6 — <strong>Urban Air Quality Assistant</strong></em>
+  <em>Built for PromptWars Challenge 6 — <strong>Urban Air Quality Assistant</strong></em><br/>
+  🚀 <strong>Live Demo:</strong> <a href="https://aerosense-162669160069.us-central1.run.app" target="_blank"><strong>https://aerosense-162669160069.us-central1.run.app</strong></a><br/>
+  📚 <strong>Interactive API Docs (Swagger):</strong> <a href="https://aerosense-162669160069.us-central1.run.app/docs" target="_blank"><strong>https://aerosense-162669160069.us-central1.run.app/docs</strong></a>
 </p>
 
 ---
 
 > [!TIP]
-> 🍃 **Zero-Key Offline Capability**: AeroSense features a built-in deterministic atmospheric dosimetry engine (`MockProvider`), allowing complete offline evaluation without external API keys or network latency.
+> 🌐 **Live Cloud Demo**: Try AeroSense directly in your browser on Google Cloud Run: [https://aerosense-162669160069.us-central1.run.app](https://aerosense-162669160069.us-central1.run.app) (Swagger docs at [/docs](https://aerosense-162669160069.us-central1.run.app/docs)).
+> Zero-key offline evaluation capability is built in: all dosimetry models and Q&A run instantly without external API keys.
 
 > [!IMPORTANT]
 > **Peer-Reviewed Dosimetry, Not Guesswork**: AeroSense calculates daily particulate lung doses avoided ($\mu\text{g}$) and **Berkeley Earth cigarette smoke equivalence** ($22\ \mu\text{g/m}^3\ \text{PM2.5 for 24h} \approx 1\text{ cigarette}$), grounding family protective routines in atmospheric inversion physics and environmental health epidemiology.
