@@ -84,10 +84,12 @@
 
 | Pipeline Stage | Module | Input & Processing | Output & Guarantees |
 | :--- | :--- | :--- | :--- |
-| **1. Ingestion** | [`app/routers/advisory.py`](app/routers/advisory.py) | Household Profile (Dwelling, Commute, Fuel, Vulnerable Members) + Ambient AQI | Pydantic v2 validation; city baseline fallback (Delhi 340, Lahore 380, Beijing 195) |
-| **2. Security** | [`app/security.py`](app/security.py) | 8-pattern regex masking, Fernet AES-128 encryption, prompt-injection defense | Sensitive PII (Phone, Email, Cards, Address, GPS) encrypted at rest; zero leakage to LLMs |
-| **3. Domain Engines** | [`app/air_quality/`](app/air_quality/) | Diurnal winter inversion curve, Corsi-Rosenthal DIY specs, sustainable alternatives | Optimizes 4 routines (42–68% exposure drop); quantifies avoided CO2 & local PM2.5 |
-| **4. Hybrid Intelligence** | [`app/llm/`](app/llm/) | Google Gemini 2.5 Flash OR Deterministic MockProvider | Evaluates inquiries and photos without hallucinating; 100% offline-evaluable |
+| **1. Ingestion & API Gateway** | [`app/routers/`](app/routers/) | HTTP Request validation with strict Pydantic v2 schemas | Pure HTTP routing; zero bare dicts; 100% typed OpenAPI 3.1 contracts |
+| **2. Enterprise Service Layer** | [`app/services/`](app/services/) | Coordinates business logic, sanitization, encryption, and transactional persistence | Complete separation of concerns between presentation and domain layers |
+| **3. Security & Privacy** | [`app/security.py`](app/security.py) | 8-pattern regex masking, Fernet AES-128 encryption, prompt-injection defense | Sensitive PII encrypted at rest; token bucket rate-limiting (50 req/s); zero leakage to LLMs |
+| **4. Domain Intelligence Engines** | [`app/air_quality/`](app/air_quality/) | Modular sub-factories modeling diurnal inversion curves, DIY IAQ hacks, substitutions | Low cyclomatic complexity (<10); calculates personal PM2.5 lung dose and CO2 savings |
+| **5. Hybrid Intelligence & Vision** | [`app/llm/`](app/llm/) | Google Gemini 2.5 Flash OR Deterministic MockProvider | Grounded conversational Q&A and multimodal image smog/filter inspection; 100% offline-evaluable |
+| **6. Relational Persistence & Migrations** | [`app/db.py`](app/db.py) & [`alembic/`](alembic/) | SQLite / PostgreSQL ORM models with Alembic schema migration version control | Reproducible schema evolution; transactional atomicity with SQLAlchemy 2.0 |
 | **5. Actionable Deliverables** | [`app/air_quality/dossier_compiler.py`](app/air_quality/dossier_compiler.py), [`frontend/`](frontend/) | Synthesizes routines, hacks, dosimetry metrics, and action plan | Downloadable Markdown action plan, WCAG 2.1 AAA web UI, and Web Speech voice narration |
 
 ---
@@ -190,12 +192,26 @@ Open your browser to:
 ## Running Automated Tests & Code Quality
 
 ```bash
-# Run Ruff linting check (0 errors)
+# Run Ruff linting check (0 errors, 100% compliant)
 ruff check .
 
-# Execute Pytest test suite with code coverage
-pytest -v --cov=app --cov-report=term-missing
+# Execute Pytest test suite across all 36 test modules
+pytest -v
+
+# Run Alembic database schema migrations
+alembic upgrade head
 ```
+
+### Enterprise Code Quality & Clean Architecture Standards
+
+AeroSense adheres to strict production-grade software engineering patterns designed for maintainability, modularity, and testability:
+
+- **3-Tier Clean Layering (`Routers` $\to$ `Services` $\to$ `Engines` $\to$ `Data Models`)**: Complete separation of concerns. Routers in `app/routers/` handle pure HTTP parsing and status codes; business logic, cryptographic coordination, and database transactions are encapsulated within dedicated service classes in `app/services/`.
+- **Database Schema Migration Tooling (Alembic)**: Fully configured Alembic migration environment (`alembic.ini`, `alembic/env.py`, `alembic/versions/`) ensuring reproducible, version-controlled schema upgrades.
+- **100% Typed API Contracts (Zero Bare Dicts)**: Every request and response conforms to strict Pydantic v2 schemas (`ProfileSummaryResponse`, `FullAirQualityAdvisoryResponse`) with descriptive field metadata, generating 100% typed OpenAPI 3.1 specifications.
+- **Low Cyclomatic Complexity (<10)**: Monolithic routines are decomposed into focused sub-factories adhering to the Single Responsibility Principle (SRP) for maximum readability and test isolation.
+- **Automated Repository Hygiene**: Enforced with `.pre-commit-config.yaml` (Ruff, YAML validation, whitespace trimming) and `[tool.mypy]` static type checking.
+
 
 ---
 
